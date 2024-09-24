@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:16
+    ports:
+      - 54320:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+#  flower:
+#    image: mher/flower
+#    ports:
+#      - 5555:5555
+#    command: celery --broker=pyamqp://guest@localhost// flower
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
