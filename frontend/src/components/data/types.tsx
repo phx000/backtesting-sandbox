@@ -3,7 +3,7 @@ import {fields} from "@/components/data/fields.tsx";
 
 export type FieldType = {
     id: string
-    type:  keyof fields | undefined
+    type:  keyof fields | "number" | undefined
     value: string | number | undefined
 }
 

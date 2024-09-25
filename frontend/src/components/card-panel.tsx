@@ -1,5 +1,5 @@
 import {Card, CardContent} from "@/components/ui/card.tsx";
-import { ScrollArea } from "../ui/scroll-area.tsx";
+import { ScrollArea } from "./ui/scroll-area.tsx";
 
 export type CardPanelProps = {
     headerText: string,

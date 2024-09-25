@@ -1,5 +1,5 @@
 import {ScrollArea} from "@/components/ui/scroll-area.tsx";
-import CardPanel from "@/components/sections/card-panel.tsx";
+import CardPanel from "@/components/card-panel.tsx";
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {Card, CardContent} from "../ui/card.tsx";
 

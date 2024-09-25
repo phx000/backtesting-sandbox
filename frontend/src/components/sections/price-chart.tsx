@@ -1,6 +1,6 @@
 import {Line} from 'react-chartjs-2';
 import {Chart, registerables} from 'chart.js';
-import CardPanel from "@/components/sections/card-panel.tsx";
+import CardPanel from "@/components/card-panel.tsx";
 
 Chart.register(...registerables);
 
