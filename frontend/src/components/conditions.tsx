@@ -7,13 +7,11 @@ import {nanoid} from "nanoid";
 import {getHighestIndex} from "@/components/data/utils.tsx";
 
 export type ConditionsProps = {
-    strategy: StrategyType,
+    strategy:StrategyType
+    conditions:ConditionType[]
 }
 
-function Conditions({strategy}:ConditionsProps) {
-    const conditions = Object.values(
-        useStore((state) => state.conditions))
-        .filter(condition => condition.strategyId === strategy.id)
+function Conditions({strategy,conditions}:ConditionsProps) {
     const addCondition = useStore((state) => state.addCondition)
     const addField = useStore((state) => state.addField)
 

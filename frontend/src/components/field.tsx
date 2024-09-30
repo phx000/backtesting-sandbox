@@ -60,7 +60,8 @@ function Field({field, fieldName, oppositeField}: FieldProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuSub>
-                    <DropdownMenuSubTrigger disabled={oppositeField.type==="number"} className={oppositeField.type==="number"?"opacity-50":""}>Number</DropdownMenuSubTrigger>
+                    <DropdownMenuSubTrigger disabled={oppositeField.type === "number"}
+                                            className={oppositeField.type === "number" ? "opacity-50" : ""}>Number</DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
                         <DropdownMenuSubContent className={"w-36"}>
                             <Input
@@ -77,7 +78,6 @@ function Field({field, fieldName, oppositeField}: FieldProps) {
                         </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                 </DropdownMenuSub>
-
                 <DropdownMenuSub>
                     <DropdownMenuSubTrigger>Dynamic data</DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
@@ -97,56 +97,43 @@ function Field({field, fieldName, oppositeField}: FieldProps) {
                         </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                 </DropdownMenuSub>
-
                 <DropdownMenuSub>
+
                     <DropdownMenuSubTrigger>Indicators</DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
                         <DropdownMenuSubContent>
                             {
                                 Object.entries(fields)
                                     .filter(([_, field]) => field.type === "indicator")
-                                    .map(([key, object]) =>
-                                        <DropdownMenuItem
-                                            key={key}
-                                            onSelect={() => updateField(field.id, {type: key})}>
-                                            {object.name}
-                                        </DropdownMenuItem>
+                                    .map(([indicatorSlug, indicatorObject]) =>
+                                        <DropdownMenuSub>
+                                            <DropdownMenuSubTrigger>{indicatorObject.name}</DropdownMenuSubTrigger>
+                                            <DropdownMenuPortal>
+                                                <DropdownMenuSubContent>
+                                                    {
+                                                        Object.entries(fields[indicatorSlug].params)
+                                                            .map(([paramSlug, paramObject]) =>
+                                                                    <DropdownMenuItem>
+                                                                        {paramSlug}
+                                                                    </DropdownMenuItem>
+                                                                // <span
+                                                                //         key={paramSlug}>
+                                                                // {/*onSelect={() => updateField(field.id, {type: key})}*/}
+                                                                //         {paramObject.name}</span>
+                                                            )
+                                                    }
+                                                </DropdownMenuSubContent>
+                                            </DropdownMenuPortal>
+                                        </DropdownMenuSub>
                                     )
                             }
                         </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                 </DropdownMenuSub>
-
-
-                {/*<DropdownMenuLabel>Dynamic data</DropdownMenuLabel>*/}
-                {/*{*/}
-                {/*    Object.entries(fields)*/}
-                {/*        .filter(([_, field]) => field.type === "simple")*/}
-                {/*        .map(([key, object]) =>*/}
-                {/*            <DropdownMenuItem*/}
-                {/*                key={key}*/}
-                {/*                onSelect={() => updateField(field.id, {type: key})}*/}
-                {/*                disabled={oppositeField.type === key}>*/}
-                {/*                {object.name}*/}
-                {/*            </DropdownMenuItem>*/}
-                {/*        )*/}
-                {/*}*/}
-                {/*<DropdownMenuSeparator/>*/}
-                {/*<DropdownMenuLabel>Indicators</DropdownMenuLabel>*/}
-                {/*{*/}
-                {/*    Object.entries(fields)*/}
-                {/*        .filter(([_, field]) => field.type === "indicator")*/}
-                {/*        .map(([key, object]) =>*/}
-                {/*            <DropdownMenuItem*/}
-                {/*                key={key}*/}
-                {/*                onSelect={() => updateField(field.id, {type: key})}>*/}
-                {/*                {object.name}*/}
-                {/*            </DropdownMenuItem>*/}
-                {/*        )*/}
-                {/*}*/}
             </DropdownMenuContent>
         </DropdownMenu>
-    );
+    )
+        ;
 }
 
 export default Field;

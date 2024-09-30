@@ -1,0 +1,154 @@
+{
+  "backtest": {
+    "ticker": {
+      "type": "str",
+      "min_len": 1,
+      "max_len": 6
+    },
+    "period": {
+      "type": "int",
+      "choices": [
+        [
+          0,
+          "Hourly"
+        ],
+        [
+          1,
+          "Daily"
+        ],
+        [
+          2,
+          "Weekly"
+        ]
+      ]
+    },
+    "strategies": {
+      "type": "list",
+      "items_type": "$_strategy",
+      "min_len": 1,
+      "max_len": 5
+    }
+  },
+  "strategy": {
+    "type": {
+      "type": "int",
+      "choices": [
+        [
+          0,
+          "buy"
+        ],
+        [
+          1,
+          "sell"
+        ]
+      ]
+    },
+    "units": {
+      "type": "float",
+      "min": 0.1,
+      "max": 100000000
+    },
+    "conditions": {
+      "type": "list",
+      "items_type": "$_condition",
+      "min_len": 1,
+      "max_len": 5
+    }
+  },
+  "condition": {
+    "operator": {
+      "type": "str",
+      "choices": [
+        [
+          0,
+          "cross_over"
+        ],
+        [
+          1,
+          "cross_below"
+        ]
+      ]
+    },
+    "fields": {
+      "type": "list",
+      "items_type": "$_field",
+      "min_len": 2,
+      "max_len": 2
+    }
+  },
+  "field": {
+    "type": {
+      "type": "int",
+      "choices": [
+        [
+          0,
+          "constant"
+        ],
+        [
+          1,
+          "data"
+        ],
+        [
+          2,
+          "indicator"
+        ]
+      ],
+      "conditions": {
+        "constant": {
+          "type": "float",
+          "min": 0,
+          "max": 100000000
+        },
+        "data": {
+          "type": "int",
+          "choices": [
+            [
+              0,
+              "price"
+            ],
+            [
+              1,
+              "volume"
+            ]
+          ]
+        },
+        "indicator": {
+          "type": "$_indicator"
+        }
+      }
+    }
+  },
+  "indicator": {
+    "type": {
+      "type": "int",
+      "choices": [
+        [
+          0,
+          "sma"
+        ],
+        [
+          1,
+          "ema"
+        ]
+      ],
+      "conditions": {
+        "sma": {
+          "window": {
+            "type": "int",
+            "min": 2,
+            "max": 1000
+          }
+        },
+        "ema": {
+          "window": {
+            "type": "int",
+            "min": 2,
+            "max": 1000
+          }
+        }
+      }
+    }
+  }
+}
+
+

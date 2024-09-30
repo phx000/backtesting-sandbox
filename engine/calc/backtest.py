@@ -29,5 +29,5 @@ class Backtest:
                     self.trades.append(trade)
 
     def _deserialize(self, serializer):
-        self.ticker = Ticker(serializer["ticker"])
+        self.ticker = Ticker(serializer["ticker"], serializer["period"])
         self.strategies = [Strategy(strategy) for strategy in serializer["strategies"]]
