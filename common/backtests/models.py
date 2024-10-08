@@ -10,6 +10,7 @@ class Backtest(models.Model):
             MinLengthValidator(schema["backtest"]["ticker"]["min_len"]),
         ]
     )
-    period = models.IntegerField(choices=schema["backtest"]["period"]["choices"])
+    period = models.CharField(
+        choices={key: value["name"] for key, value in schema["backtest"]["period"]["choices"].items()})
     strategies = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)

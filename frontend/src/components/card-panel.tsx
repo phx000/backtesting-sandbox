@@ -11,8 +11,8 @@ function CardPanel({headerText, children, className}: CardPanelProps) {
     return (
         <Card className={className}>
             <CardContent className={"h-full p-2"}>
-                <ScrollArea className={"h-full p-2"}>
-                    <div className="space-y-4" style={{padding:"1px"}}>
+                <ScrollArea className={"flex flex-col h-full p-2"}>
+                    <div className="flex flex-col space-y-4" style={{padding:"1px"}}>
                         <h4>{headerText}</h4>
                         {children}
                     </div>

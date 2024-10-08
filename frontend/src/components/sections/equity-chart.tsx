@@ -1,6 +1,7 @@
 import {Line} from 'react-chartjs-2';
 import {Chart, registerables} from 'chart.js';
 import CardPanel from "@/components/card-panel.tsx";
+import {useResultStore} from "@/components/data/result-store.tsx";
 
 Chart.register(...registerables);
 
@@ -89,10 +90,18 @@ const EquityChart = () => {
         maintainAspectRatio: false
     };
 
+    const equityChartData=useResultStore(state => state.equityChartData)
+
     return (
         <CardPanel headerText={"Equity chart"}>
-            <div>
-                <Line data={data} options={options}/>
+            <div className={"h-48"}>
+                {
+                    equityChartData === undefined ? (
+                        <div></div>
+                    ) : (
+                        <Line data={data} options={options}/>
+                    )
+                }
             </div>
         </CardPanel>
     )

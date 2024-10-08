@@ -5,22 +5,77 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion.tsx";
 import {useEffect, useState} from "react";
 import {useConfigForm} from "@/components/forms/config-form.tsx";
+import SCHEMA from "@/components/data/schema.tsx";
+import {capitalize} from "@/utils.tsx";
+import {useConfigStore} from "@/components/data/config-store.tsx";
+import axios from "axios"
+import {useToast} from "@/hooks/use-toast.ts";
+import {useAppStore} from "@/components/data/app-store.tsx";
+
+axios.defaults.baseURL = "http://localhost:8000"
 
 
 function Config() {
+    const {toast} = useToast()
     const [tradingAccountAccordionErrors, setTradingAccountAccordionErrors] = useState(false)
     const form = useConfigForm()
+    const strategies = useConfigStore((state) => state.strategies)
+    const conditions = useConfigStore((state) => state.conditions)
+    const fields = useConfigStore((state) => state.fields)
+
+    const setBacktestLoading = useAppStore((state) => state.setBacktestLoading)
+
 
     useEffect(() => {
         setTradingAccountAccordionErrors(!!form.formState.errors.initialCapital);
     }, [form.formState.errors.initialCapital])
 
-    function onSubmit() {
+    function onSubmit(data) {
+        if (Object.values(strategies).some((strategy) => strategy.errorCount > 0)) {
+            return
+        }
+
+        setBacktestLoading(true)
+
+        axios.post("/api/backtests/",
+            {
+                ticker: data.ticker,
+                period: data.period,
+                strategies: Object.values(strategies)
+                    .map(strategy => ({
+                        type: strategy.type,
+                        units: strategy.shares,
+                        conditions: Object.values(conditions)
+                            .filter(condition => condition.strategyId === strategy.id)
+                            .map(condition => ({
+                                operator: condition.operator,
+                                fields: [fields[condition.field1Id], fields[condition.field2Id]]
+                                    .map(field => ({
+                                        type: field.type,
+                                        value: field.value
+                                    }))
+                            }))
+                    }))
+            }
+        )
+            .then((response) => {
+                console.log("success")
+                setBacktestLoading(false)
+            })
+            .catch((error) => {
+                setBacktestLoading(false)
+                console.log(error)
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: `There was a problem with your request. HTTP code: ${error.code} error content: ${JSON.stringify(error.response.data)}`,
+                })
+            })
     }
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+            <form id={"configForm"} onSubmit={form.handleSubmit(onSubmit)}>
                 <CardPanel headerText={"Configuration"}>
                     <FormField
                         control={form.control}
@@ -45,9 +100,13 @@ function Config() {
                                         <SelectValue placeholder={"Select a period"}/>
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value={"hourly"}>Hourly</SelectItem>
-                                        <SelectItem value={"daily"}>Daily</SelectItem>
-                                        <SelectItem value={"weekly"}>Weekly</SelectItem>
+                                        {
+                                            Object.entries(SCHEMA.backtest.period.choices)
+                                                .map(([choiceSlug, choiceObject]) =>
+                                                    <SelectItem key={choiceSlug}
+                                                                value={choiceSlug}>{choiceObject.name}</SelectItem>
+                                                )
+                                        }
                                     </SelectContent>
                                 </Select>
                             </FormControl>

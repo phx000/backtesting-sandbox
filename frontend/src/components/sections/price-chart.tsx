@@ -1,11 +1,12 @@
 import {Line} from 'react-chartjs-2';
 import {Chart, registerables} from 'chart.js';
 import CardPanel from "@/components/card-panel.tsx";
+import {useConfigStore} from "@/components/data/config-store.tsx";
+import {useResultStore} from "@/components/data/result-store.tsx";
 
 Chart.register(...registerables);
 
 const PriceChart = () => {
-    // Generate sample AAPL stock prices
     const labels = [
         'Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5',
         'Day 6', 'Day 7', 'Day 8', 'Day 9', 'Day 10',
@@ -57,10 +58,20 @@ const PriceChart = () => {
         maintainAspectRatio: false
     };
 
+    const responseTicker = useResultStore((state) => state.responseTicker)
+    const priceChartData = useResultStore((state) => state.priceChartData)
+
+
     return (
-        <CardPanel headerText={"AAPL Price"}>
+        <CardPanel headerText={responseTicker === undefined ? "Price chart" : `${responseTicker} price chart`}>
             <div className={"h-72"}>
-                <Line data={data} options={options}/>
+                {
+                    priceChartData === undefined ? (
+                        <div></div>
+                    ) : (
+                        <Line data={data} options={options}/>
+                    )
+                }
             </div>
         </CardPanel>
     )

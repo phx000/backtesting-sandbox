@@ -6,17 +6,16 @@ from . import schema
 
 class IndicatorSerializer(serializers.Serializer):
     type = serializers.ChoiceField(
-        choices=schema["indicator"]["type"]["choices"],
+        choices=list(schema["indicator"]["type"]["choices"].keys()),
     )
-    params = serializers.JSONField()
+    value = serializers.JSONField()
 
     def validate(self, data):
-        type_string = dict(self.fields["type"].choices)[data["type"]]
-        params = schema["indicator"]["type"]["conditions"][type_string]
+        params = schema["indicator"]["type"]["choices"][data["type"]]["params"]
 
         param_errors = {}
 
-        for param_name, param_value in data["params"].items():
+        for param_name, param_value in data["value"]["params"].items():
             if param_name not in params:
                 param_errors[param_name] = ["This param cannot be used for for this indicator."]
                 continue
@@ -54,28 +53,26 @@ class IndicatorSerializer(serializers.Serializer):
 
 class FieldSerializer(serializers.Serializer):
     type = serializers.ChoiceField(
-        choices=schema["field"]["type"]["choices"]
+        choices=list(schema["field"]["type"]["choices"].keys())
     )
     value = serializers.JSONField()
 
     def validate(self, data):
-        type_string = dict(self.fields["type"].choices)[data["type"]]
-
         try:
-            if type_string == "constant":
+            if data["type"] == "constant":
                 field = serializers.FloatField(
-                    min_value=schema["field"]["type"]["conditions"]["constant"]["min"],
-                    max_value=schema["field"]["type"]["conditions"]["constant"]["max"]
+                    min_value=schema["field"]["type"]["choices"]["constant"]["min"],
+                    max_value=schema["field"]["type"]["choices"]["constant"]["max"]
                 )
                 field.run_validation(data["value"])
 
-            elif type_string == "data":
+            elif data["type"] == "data":
                 field = serializers.ChoiceField(
-                    choices=schema["field"]["type"]["conditions"]["data"]["choices"]
+                    choices=list(schema["field"]["type"]["choices"]["data"]["choices"].keys())
                 )
                 field.run_validation(data["value"])
 
-            elif type_string == "indicator":
+            elif data["type"] == "indicator":
                 serializer = IndicatorSerializer(data=data["value"])
                 serializer.is_valid(raise_exception=True)
 
@@ -89,7 +86,7 @@ class FieldSerializer(serializers.Serializer):
 
 class ConditionSerializer(serializers.Serializer):
     operator = serializers.ChoiceField(
-        choices=schema["condition"]["operator"]["choices"]
+        choices=list(schema["condition"]["operator"]["choices"].keys())
     )
     fields = serializers.ListSerializer(
         child=FieldSerializer(),
@@ -100,7 +97,7 @@ class ConditionSerializer(serializers.Serializer):
 
 class StrategySerializer(serializers.Serializer):
     type = serializers.ChoiceField(
-        choices=schema["strategy"]["type"]["choices"]
+        choices=list(schema["strategy"]["type"]["choices"].keys())
     )
     units = serializers.FloatField(
         min_value=schema["strategy"]["units"]["min"],

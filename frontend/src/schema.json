@@ -31,10 +31,8 @@
       "type": "int",
       "choices": {
         "buy": {
-          "name": "buy"
         },
         "sell": {
-          "name": "sell"
         }
       }
     },

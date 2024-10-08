@@ -11,127 +11,142 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {fields} from "@/components/data/fields.tsx";
 import {ChevronDown} from "lucide-react";
-import {FieldType} from "@/components/data/types.tsx";
-import {useStore} from "@/components/data/store.tsx";
+import {ConditionType, FieldType} from "@/components/data/types.tsx";
+import {useConfigStore} from "@/components/data/config-store.tsx";
 import {Input} from "@/components/ui/input.tsx";
-import {Badge} from "@/components/ui/badge.tsx";
 import {useState} from "react";
+import SCHEMA from "@/components/data/schema.tsx";
+import IndicatorParams from "@/components/indicator-params.tsx";
 
 export type FieldProps = {
     field: FieldType
     fieldName: string
     oppositeField: FieldType
+    condition: ConditionType
 }
 
-function Field({field, fieldName, oppositeField}: FieldProps) {
+function Field({field, fieldName, oppositeField, condition}: FieldProps) {
     const [displayNumberError, setDisplayNumberError] = useState(false)
-    const updateField = useStore(state => state.updateField)
+    const updateField = useConfigStore(state => state.updateField)
 
     function handleNumberChange(event: React.ChangeEvent<HTMLInputElement>) {
         const value = event.target.value
-        if (value < 0 || value > 100_000_000) {
+        if (value < SCHEMA.field.type.choices.constant.min || value > SCHEMA.field.type.choices.constant.max) {
             setDisplayNumberError(true)
         } else if (!isNaN(parseFloat(value)) && isFinite(value)) {
             setDisplayNumberError(false)
-            updateField(field.id, {type: "number", value: event.target.value})
+            updateField(field.id, {type: "constant", value: event.target.value})
+        }
+    }
+
+    function renderFieldButton() {
+
+        if (field.type === "constant") {
+            return (
+                <div className={"flex items-center space-x-2"}>
+                    <span>{field.value}</span>
+                    <small>(num)</small>
+                </div>
+            )
+        }
+        if (field.type === "data") {
+            return <span>{SCHEMA.field.type.choices.data.choices[field.value].name}</span>
+        }
+        if (field.type === "indicator") {
+            return (
+                <div className={"flex items-center space-x-2"}>
+                    <span>{SCHEMA.indicator.type.choices[field.value.type].name}</span>
+                    {
+                        Object.values(field.value.params)
+                            .map((value, index) =>
+                                <small key={index}>{value}</small>
+                            )
+                    }
+                </div>
+            )
+        }
+        if (field.type === undefined) {
+            return <span className={"opacity-50"}>{fieldName}</span>
         }
     }
 
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild className={"w-full"}>
-                <Button type={"button"} variant={"outline"} className="flex justify-between">
-                    {
-                        field.type === undefined ? (
-                            <span className={"opacity-50"}>{fieldName}</span>
-                        ) : field.type === "number" ? (
-                            <div className={"flex items-center space-x-2"}>
-                                <span>{field.value}</span>
-                                <small>(num)</small>
-                            </div>
-                        ) : (
-                            <span>{fields[field.type].name}</span>
-                        )
-                    }
-                    <ChevronDown className={"w-4"}/>
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <DropdownMenuSub>
-                    <DropdownMenuSubTrigger disabled={oppositeField.type === "number"}
-                                            className={oppositeField.type === "number" ? "opacity-50" : ""}>Number</DropdownMenuSubTrigger>
-                    <DropdownMenuPortal>
-                        <DropdownMenuSubContent className={"w-36"}>
-                            <Input
-                                type={"number"}
-                                placeholder={"0.00"}
-                                className={"w-full"}
-                                onChange={handleNumberChange}
-                                onBlur={() => setDisplayNumberError(false)}
-                            />
-                            {
-                                displayNumberError &&
-                                <small className={"text-red-500"}>Number must be between 0 and 100000000</small>
-                            }
-                        </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                </DropdownMenuSub>
-                <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>Dynamic data</DropdownMenuSubTrigger>
-                    <DropdownMenuPortal>
-                        <DropdownMenuSubContent>
-                            {
-                                Object.entries(fields)
-                                    .filter(([_, field]) => field.type === "simple")
-                                    .map(([key, object]) =>
-                                        <DropdownMenuItem
-                                            key={key}
-                                            onSelect={() => updateField(field.id, {type: key})}
-                                            disabled={oppositeField.type === key}>
-                                            {object.name}
-                                        </DropdownMenuItem>
-                                    )
-                            }
-                        </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                </DropdownMenuSub>
-                <DropdownMenuSub>
+        <div className={"w-full"}>
+            {(condition.showErrors && field.type === undefined) && <small className={"text-red-500"}>Required</small>}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild className={"w-full"}>
+                    <Button type={"button"} variant={"outline"} className="flex justify-between">
+                        {renderFieldButton()}
+                        <ChevronDown className={"w-4"}/>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuSub>
+                        <DropdownMenuSubTrigger disabled={oppositeField.type === "constant"}
+                                                className={oppositeField.type === "constant" ? "opacity-50" : ""}>Number</DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                            <DropdownMenuSubContent className={"w-36"}>
+                                <Input
+                                    type={"number"}
+                                    placeholder={"0.00"}
+                                    className={"w-full"}
+                                    onChange={handleNumberChange}
+                                    onBlur={() => setDisplayNumberError(false)}
+                                />
+                                {
+                                    displayNumberError &&
+                                    <small className={"text-red-500"}>Number must be between 0 and 100000000</small>
+                                }
+                            </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                    <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>Dynamic data</DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                            <DropdownMenuSubContent>
+                                {
+                                    Object.entries(SCHEMA.field.type.choices.data.choices)
+                                        .map(([choiceSlug, choiceObject]) =>
+                                            <DropdownMenuItem
+                                                key={choiceSlug}
+                                                onSelect={() => updateField(field.id, {
+                                                    type: "data",
+                                                    value: choiceSlug
+                                                })}
+                                                disabled={oppositeField.type === "data" && oppositeField.value === choiceSlug}>
+                                                {choiceObject.name}
+                                            </DropdownMenuItem>
+                                        )
+                                }
+                            </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                    <DropdownMenuSub>
 
-                    <DropdownMenuSubTrigger>Indicators</DropdownMenuSubTrigger>
-                    <DropdownMenuPortal>
-                        <DropdownMenuSubContent>
-                            {
-                                Object.entries(fields)
-                                    .filter(([_, field]) => field.type === "indicator")
-                                    .map(([indicatorSlug, indicatorObject]) =>
-                                        <DropdownMenuSub>
-                                            <DropdownMenuSubTrigger>{indicatorObject.name}</DropdownMenuSubTrigger>
-                                            <DropdownMenuPortal>
-                                                <DropdownMenuSubContent>
-                                                    {
-                                                        Object.entries(fields[indicatorSlug].params)
-                                                            .map(([paramSlug, paramObject]) =>
-                                                                    <DropdownMenuItem>
-                                                                        {paramSlug}
-                                                                    </DropdownMenuItem>
-                                                                // <span
-                                                                //         key={paramSlug}>
-                                                                // {/*onSelect={() => updateField(field.id, {type: key})}*/}
-                                                                //         {paramObject.name}</span>
-                                                            )
-                                                    }
-                                                </DropdownMenuSubContent>
-                                            </DropdownMenuPortal>
-                                        </DropdownMenuSub>
-                                    )
-                            }
-                        </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                </DropdownMenuSub>
-            </DropdownMenuContent>
-        </DropdownMenu>
+                        <DropdownMenuSubTrigger>Indicators</DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                            <DropdownMenuSubContent>
+                                {
+                                    Object.entries(SCHEMA.indicator.type.choices)
+                                        .map(([indicatorSlug, indicatorObject]) =>
+                                            <DropdownMenuSub key={indicatorSlug}>
+                                                <DropdownMenuSubTrigger>{indicatorObject.name}</DropdownMenuSubTrigger>
+                                                <DropdownMenuPortal>
+                                                    <DropdownMenuSubContent>
+                                                        <IndicatorParams indicatorSlug={indicatorSlug}
+                                                                         indicator={indicatorObject} field={field}/>
+                                                    </DropdownMenuSubContent>
+                                                </DropdownMenuPortal>
+                                            </DropdownMenuSub>
+                                        )
+                                }
+                            </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
     )
         ;
 }

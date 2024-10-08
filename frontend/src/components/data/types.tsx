@@ -1,24 +1,31 @@
-import {operators} from "@/components/data/operators.tsx";
-import {fields} from "@/components/data/fields.tsx";
+import SCHEMA from "@/components/data/schema.tsx";
 
 export type FieldType = {
     id: string
-    type:  keyof fields | "number" | undefined
-    value: string | number | undefined
+    type: keyof SCHEMA.field.type.choices | undefined
+    value: number | string | object | undefined
 }
 
 export type ConditionType = {
     id: string
     strategyId: string
     index: number
-    operator: keyof operators | undefined
+    operator: keyof SCHEMA.condition.operator.choices | undefined
     field1Id: string | undefined
     field2Id: string | undefined
+    errorCount: number
+    showErrors: boolean
 }
 
 export type StrategyType = {
     id: string
     index: number
-    type: "buy" | "sell" | undefined,
+    type: typeof SCHEMA.strategy.type.choices[number] | undefined
     shares: number | undefined
+    enableTakeProfit: boolean
+    takeProfit: number | undefined
+    enableStopLoss: boolean
+    stopLoss: number | undefined
+    errorCount: number
+    showErrors: boolean
 }

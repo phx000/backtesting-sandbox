@@ -2,7 +2,7 @@ import {create} from "zustand"
 import {immer} from "zustand/middleware/immer"
 import {StrategyType, ConditionType, FieldType} from '@/components/data/types.tsx'
 
-type StoreState = {
+type ConfigStoreState = {
     strategies: Record<string, StrategyType>;
     conditions: Record<string, ConditionType>;
     fields: Record<string, FieldType>;
@@ -20,7 +20,7 @@ type StoreState = {
     deleteField: (id: string) => void;
 }
 
-export const useStore = create<StoreState>()(
+export const useConfigStore = create<ConfigStoreState>()(
     immer((set, get) => ({
         strategies: {},
         conditions: {},

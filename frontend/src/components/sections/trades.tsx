@@ -2,6 +2,8 @@ import {ScrollArea} from "@/components/ui/scroll-area.tsx";
 import CardPanel from "@/components/card-panel.tsx";
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {Card, CardContent} from "../ui/card.tsx";
+import {Line} from "react-chartjs-2";
+import {useResultStore} from "@/components/data/result-store.tsx";
 
 function Trades() {
     function generateStrategies(num) {
@@ -20,7 +22,7 @@ function Trades() {
                 'openDate': openDate.toLocaleDateString(),
                 'closeDate': closeDate.toLocaleDateString(),
                 'closeReason': closeReasons[Math.floor(Math.random() * closeReasons.length)],
-                'shares': Math.floor(Math.random() * 1000 -500) + 1, // Random number of shares between 1 and 1000
+                'shares': Math.floor(Math.random() * 1000 - 500) + 1, // Random number of shares between 1 and 1000
                 'PL': parseFloat((Math.random() * 2000 - 1000).toFixed(2)),
             };
 
@@ -32,40 +34,49 @@ function Trades() {
 // Example usage:
     const trades = generateStrategies(20);
 
+    const tradesData = useResultStore(state => state.tradesData)
+
     return (
         <CardPanel headerText={"Trades"} className={"h-full"}>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>#</TableHead>
-                        <TableHead>Strategy #</TableHead>
-                        <TableHead>Open date</TableHead>
-                        <TableHead>Close date</TableHead>
-                        <TableHead>Close reason</TableHead>
-                        <TableHead>Shares</TableHead>
-                        <TableHead className={"text-right"}>P&L</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {
-                        trades.map((trade, index) =>
-                            <TableRow key={index}>
-                                <TableCell>{index + 1}</TableCell>
-                                <TableCell>{trade.strategyNumber}</TableCell>
-                                <TableCell>{trade.openDate}</TableCell>
-                                <TableCell>{trade.closeDate}</TableCell>
-                                <TableCell>{trade.closeReason}</TableCell>
-                                <TableCell className={trade.shares<0?"text-red-500":"text-green-500"}>
-                                    {trade.shares}
-                                </TableCell>
-                                <TableCell className={"text-right font-medium "+(trade.PL>0?"text-green-500":"text-red-500")}>
-                                    {trade.PL}
-                                </TableCell>
+            {
+                tradesData === undefined ? (
+                    <div></div>
+                ) : (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>#</TableHead>
+                                <TableHead>Strategy #</TableHead>
+                                <TableHead>Open date</TableHead>
+                                <TableHead>Close date</TableHead>
+                                <TableHead>Close reason</TableHead>
+                                <TableHead>Shares</TableHead>
+                                <TableHead className={"text-right"}>P&L</TableHead>
                             </TableRow>
-                        )
-                    }
-                </TableBody>
-            </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {
+                                trades.map((trade, index) =>
+                                    <TableRow key={index}>
+                                        <TableCell>{index + 1}</TableCell>
+                                        <TableCell>{trade.strategyNumber}</TableCell>
+                                        <TableCell>{trade.openDate}</TableCell>
+                                        <TableCell>{trade.closeDate}</TableCell>
+                                        <TableCell>{trade.closeReason}</TableCell>
+                                        <TableCell className={trade.shares < 0 ? "text-red-500" : "text-green-500"}>
+                                            {trade.shares}
+                                        </TableCell>
+                                        <TableCell
+                                            className={"text-right font-medium " + (trade.PL > 0 ? "text-green-500" : "text-red-500")}>
+                                            {trade.PL}
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            }
+                        </TableBody>
+                    </Table>
+                )
+            }
         </CardPanel>
     )
 }
