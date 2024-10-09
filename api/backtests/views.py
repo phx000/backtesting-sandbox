@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
-from common.backtests.models import Backtest
-from common.backtests.serializers import BacktestSerializer
-from engine.core.celery import app
+from .models import Backtest
+from .serializers import BacktestSerializer
+from .tasks import add
 
 
 class BacktestViewSet(ModelViewSet):
@@ -9,5 +9,7 @@ class BacktestViewSet(ModelViewSet):
     queryset = Backtest.objects.all()
 
     def perform_create(self, serializer):
-        # backtest = serializer.save()
-        app.send_task("backtest", args=[serializer.data])
+        backtest = serializer.save()
+        add.delay(1, 6)
+
+        # app.send_task("backtest", args=[serializer.data])

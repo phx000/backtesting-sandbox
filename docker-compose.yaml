@@ -17,11 +17,45 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-#  flower:
-#    image: mher/flower
-#    ports:
-#      - 5555:5555
-#    command: celery --broker=pyamqp://guest@localhost// flower
+  nginx:
+    image: nginx:1.27
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api
+      - ws
+
+  api:
+    build:
+      context: /api
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    env_file:
+      - .env
+    volumes:
+      - ./api:/app
+    command: [ "gunicorn", "--bind", "0.0.0.0:8000", "core.wsgi:application" ]
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  ws:
+    build:
+      context: /api
+      dockerfile: Dockerfile
+    ports:
+      - 8001:8001
+    env_file:
+      - .env
+    volumes:
+      - ./api:/app
+    command: [ "daphne", "-b", "0.0.0.0", "-p", "8001", "core.asgi:application" ]
+    depends_on:
+      - postgres
+      - rabbitmq
 
 volumes:
   postgres_data:

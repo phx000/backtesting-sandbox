@@ -19,16 +19,6 @@ import sys
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-sys.path.append("..")
-
-# todo remove this in docker
-with open(BASE_DIR / ".env") as file:
-    for line in file.read().splitlines():
-        if not line.strip():
-            continue
-        key, value = line.split("=")
-        os.environ.setdefault(key, value)
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -39,11 +29,14 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 DEBUG = os.environ.get("DJANGO_DEBUG") == "True"
 
 ALLOWED_HOSTS_ENV_VAR = os.environ.get("DJANGO_ALLOWED_HOSTS")
-ALLOWED_HOSTS = ["*"] if ALLOWED_HOSTS_ENV_VAR == "*" else ",".split(os.environ.get("DJANGO_ALLOWED_HOSTS"))
+ALLOWED_HOSTS = ["*"] if ALLOWED_HOSTS_ENV_VAR == "*" else os.environ.get("DJANGO_ALLOWED_HOSTS").split(",")
 
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
+    "channels",
+
     # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,11 +44,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'corsheaders',
+    "corsheaders",
     "rest_framework",
     "drf_spectacular",
 
-    "common.backtests",
     "backtests",
 ]
 
@@ -142,6 +134,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ASGI_APPLICATION = "core.asgi.application"
 
 CORS_ALLOW_ALL_ORIGINS = True
 
